@@ -1,7 +1,9 @@
 package com.example.pizza
 
+import com.example.pizza.screen.IngredientsTypeUiState
+
 
 interface OrderInteraction {
     fun onChangePizzaSize(position: Int, size: Float)
-    fun onIngredientsClick(ingredientsPosition: Int, pizzaPosition: Int)
+    fun onIngredientsClick(ingredient: IngredientsTypeUiState, pizzaPosition: Int)
 }

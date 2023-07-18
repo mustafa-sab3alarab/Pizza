@@ -15,7 +15,6 @@ fun PizzaPager(
     modifier: Modifier = Modifier,
     state: OrderUiState,
     pagerState: PagerState,
-    onItemClickListener: () -> Unit,
     content: @Composable (page: Int) -> Unit
 ) {
     HorizontalPager(

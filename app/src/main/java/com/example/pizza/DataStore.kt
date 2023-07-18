@@ -13,19 +13,11 @@ object DataStore {
         PizzaUiState(id = 4,image = R.drawable.bread_5)
     )
 
-    fun iconIngredients() = listOf(
-        IngredientsTypeUiState(id = 0,R.drawable.ic_basil),
-        IngredientsTypeUiState(id = 1,R.drawable.ic_onion),
-        IngredientsTypeUiState(id = 2,R.drawable.ic_mushroom),
-        IngredientsTypeUiState(id = 3,R.drawable.ic_broccoli),
-        IngredientsTypeUiState(id = 4,R.drawable.ic_sausage)
-    )
-
     fun pizzaIngredients() = listOf(
-        IngredientsTypeUiState(id = 0,R.drawable.image_basil),
-        IngredientsTypeUiState(id = 1,R.drawable.image_onion),
-        IngredientsTypeUiState(id = 2,R.drawable.image_mushroom),
-        IngredientsTypeUiState(id = 3,R.drawable.image_broccoli),
-        IngredientsTypeUiState(id = 3,R.drawable.image_sausage),
+        IngredientsTypeUiState(id = 0, icon = R.drawable.ic_basil, image = R.drawable.image_basil),
+        IngredientsTypeUiState(id = 1, icon = R.drawable.ic_onion, image = R.drawable.image_onion),
+        IngredientsTypeUiState(id = 2, icon = R.drawable.ic_mushroom, image = R.drawable.image_mushroom),
+        IngredientsTypeUiState(id = 3, icon = R.drawable.ic_broccoli, image = R.drawable.image_broccoli),
+        IngredientsTypeUiState(id = 3, icon = R.drawable.ic_sausage, image = R.drawable.image_sausage),
     )
 }
