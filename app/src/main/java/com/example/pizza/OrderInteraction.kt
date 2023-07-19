@@ -1,9 +1,9 @@
 package com.example.pizza
 
-import com.example.pizza.screen.IngredientsTypeUiState
+import androidx.compose.material3.FabPosition
 
 
 interface OrderInteraction {
     fun onChangePizzaSize(position: Int, size: Float)
-    fun onIngredientsClick(ingredient: IngredientsTypeUiState, pizzaPosition: Int)
+    fun onIngredientsClick(ingredientPosition: Int, pizzaPosition: Int)
 }

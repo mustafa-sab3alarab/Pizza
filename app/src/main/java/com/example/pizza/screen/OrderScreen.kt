@@ -1,6 +1,10 @@
 package com.example.pizza.screen
 
-import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,19 +25,15 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pizza.OrderInteraction
 import com.example.pizza.R
 import com.example.pizza.screen.composable.PizzaPager
+import com.example.pizza.ui.theme.Brown
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -63,7 +65,7 @@ fun OrderScreen(
 fun OrderContent(
     state: OrderUiState,
     pagerState: PagerState,
-    orderInteraction: OrderInteraction
+    orderInteraction: OrderInteraction,
 ) {
     Column(Modifier.fillMaxSize()) {
 
@@ -81,11 +83,10 @@ fun OrderContent(
                 painter = painterResource(id = R.drawable.plate), contentDescription = "plate"
             )
 
-            PizzaPager(modifier = Modifier
-                .fillMaxWidth(),
+            PizzaPager(
+                modifier = Modifier.fillMaxWidth(),
                 state = state,
-                pagerState = pagerState,
-                onItemClickListener = { }
+                pagerState = pagerState
             ) { page ->
 
                 Box {
@@ -95,6 +96,10 @@ fun OrderContent(
                         painter = painterResource(id = state.pizzaBreads[page].image),
                         contentDescription = "pizza"
                     )
+                }
+
+                state.pizzaBreads[pagerState.currentPage].pizzaIngredients.forEach {
+                    IngredientsAnimation(it)
                 }
             }
         }
@@ -142,43 +147,50 @@ fun OrderContent(
             )
         )
 
-        MultiSelectFlowRow(
-            state = state,
-            onIngredientSelected = { index: Int ->
-
+        LazyRow(
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            itemsIndexed(state.pizzaBreads[pagerState.currentPage].pizzaIngredients) { index: Int, item: IngredientsTypeUiState ->
+                IconIngredients(state = item, isSelected = item.isSelected,
+                    onClick = { orderInteraction.onIngredientsClick(index ,pagerState.currentPage) }
+                )
             }
-        )
+        }
 
+        Spacer(modifier = Modifier.weight(1f))
+
+
+        Button(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 16.dp),
+            colors = ButtonDefaults.buttonColors(Brown),
+            shape = RoundedCornerShape(8.dp),
+            onClick = {}
+        ) {
+            Icon(
+                modifier = Modifier.padding(end = 4.dp),
+                painter = painterResource(id = R.drawable.ic_shopping_cart),
+                contentDescription = "shopping icon"
+            )
+            Text(text = "Add to Cart")
+        }
     }
 }
 
-
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun MultiSelectFlowRow(
-    state: OrderUiState,
-    onIngredientSelected: (Int) -> Unit
-) {
-
-    val selectedItems = remember { mutableStateListOf<Int>() }
-
-    LazyRow(
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+fun IngredientsAnimation(state: IngredientsTypeUiState) {
+    AnimatedVisibility(
+        visible = state.isSelected,
+        enter = scaleIn(initialScale = 4f) + fadeIn(),
+        exit = fadeOut()
     ) {
-        itemsIndexed(state.iconIngredients) { index: Int, item: IngredientsTypeUiState ->
-            IconIngredients(
-                state = item,
-                isSelected = selectedItems.contains(index),
-                onClick = {
-                    if (selectedItems.contains(index)) {
-                        selectedItems.remove(index)
-                    } else {
-                        selectedItems.add(index)
-                    }
-                    onIngredientSelected(index)
-                }
-            )
-        }
+        Image(
+            painter = painterResource(id = state.image),
+            contentDescription = "plate",
+        )
     }
 }
 
@@ -186,17 +198,19 @@ fun MultiSelectFlowRow(
 private fun IconIngredients(
     state: IngredientsTypeUiState,
     isSelected: Boolean,
-    onClick: (id: Int) -> Unit
+    onClick: () -> Unit
 ) {
     Box(modifier = Modifier
+        .size(64.dp)
         .clip(CircleShape)
-        .clickable { onClick(state.id) }
+        .clickable { onClick() }
         .background(if (isSelected) Color.Green.copy(alpha = 0.1f) else Color.Transparent)
-        .padding(8.dp)
+        .padding(8.dp),
+        contentAlignment = Alignment.Center
     ) {
         Image(
             modifier = Modifier.size(32.dp),
-            painter = painterResource(id = state.image),
+            painter = painterResource(id = state.icon),
             contentDescription = "ingredients"
         )
     }

@@ -17,11 +17,11 @@ class OrderViewModel @Inject constructor() : ViewModel(), OrderInteraction {
 
 
     init {
+        _state.update { it.copy(pizzaBreads = DataStore.pizza()) }
         _state.update {
-            it.copy(
-                pizzaBreads = DataStore.pizza(),
-                iconIngredients = DataStore.iconIngredients()
-            )
+            it.copy(pizzaBreads = it.pizzaBreads.map {
+                it.copy(pizzaIngredients = DataStore.pizzaIngredients())
+            })
         }
     }
 
@@ -39,7 +39,29 @@ class OrderViewModel @Inject constructor() : ViewModel(), OrderInteraction {
     }
 
     override fun onIngredientsClick(ingredientsPosition: Int, pizzaPosition: Int) {
-        val current = _state.value.pizzaBreads[pizzaPosition].pizzaIngredients[ingredientsPosition].isSelected
-        _state.value.pizzaBreads[pizzaPosition].pizzaIngredients[ingredientsPosition].copy(isSelected = !current)
+        _state.update {
+            it.copy(
+                it.pizzaBreads.mapIndexed { pizzaIndex, pizza ->
+                    if (pizzaIndex == pizzaPosition) {
+                        pizza.copy(
+                            pizzaIngredients = pizza.pizzaIngredients.mapIndexed { index, ingredient ->
+                                if (index == ingredientsPosition) {
+                                    ingredient.copy(isSelected = !ingredient.isSelected)
+                                } else {
+                                    ingredient.copy(isSelected = ingredient.isSelected)
+                                }
+                            },
+                        )
+                    } else {
+                        pizza.copy(
+                            pizzaIngredients = pizza.pizzaIngredients.mapIndexed { index, ingredient ->
+                                ingredient.copy(isSelected = ingredient.isSelected)
+                            },
+                        )
+                    }
+                },
+                currentPage = pizzaPosition,
+            )
+        }
     }
 }

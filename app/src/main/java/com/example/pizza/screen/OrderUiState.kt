@@ -2,7 +2,8 @@ package com.example.pizza.screen
 
 
 data class OrderUiState(
-    val pizzaBreads: List<PizzaUiState> = emptyList()
+    val pizzaBreads: List<PizzaUiState> = emptyList(),
+    val currentPage: Int = 0,
 )
 data class PizzaUiState(
     val id : Int = 0,

@@ -14,10 +14,10 @@ object DataStore {
     )
 
     fun pizzaIngredients() = listOf(
-        IngredientsTypeUiState(id = 0, icon = R.drawable.ic_basil, image = R.drawable.image_basil),
-        IngredientsTypeUiState(id = 1, icon = R.drawable.ic_onion, image = R.drawable.image_onion),
-        IngredientsTypeUiState(id = 2, icon = R.drawable.ic_mushroom, image = R.drawable.image_mushroom),
-        IngredientsTypeUiState(id = 3, icon = R.drawable.ic_broccoli, image = R.drawable.image_broccoli),
-        IngredientsTypeUiState(id = 3, icon = R.drawable.ic_sausage, image = R.drawable.image_sausage),
+        IngredientsTypeUiState(id = 0, icon = R.drawable.ic_basil, image = R.drawable.image_basil, isSelected = false),
+        IngredientsTypeUiState(id = 1, icon = R.drawable.ic_onion, image = R.drawable.image_onion, isSelected = false),
+        IngredientsTypeUiState(id = 2, icon = R.drawable.ic_mushroom, image = R.drawable.image_mushroom, isSelected = false),
+        IngredientsTypeUiState(id = 3, icon = R.drawable.ic_broccoli, image = R.drawable.image_broccoli, isSelected = false),
+        IngredientsTypeUiState(id = 4, icon = R.drawable.ic_sausage, image = R.drawable.image_sausage, isSelected = false),
     )
 }
