@@ -3,6 +3,7 @@ package com.example.pizza.screen
 import androidx.lifecycle.ViewModel
 import com.example.pizza.DataStore
 import com.example.pizza.OrderInteraction
+import com.example.pizza.PizzaSize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,11 +26,11 @@ class OrderViewModel @Inject constructor() : ViewModel(), OrderInteraction {
         }
     }
 
-    override fun onChangePizzaSize(position: Int, size: Float) {
+    override fun onChangePizzaSize(position: Int, size: PizzaSize) {
         val currentState = _state.value
         val updatedPizza = currentState.pizzaBreads.mapIndexed { index, pizzaUiState ->
             if (index == position) {
-                pizzaUiState.copy(defaultSize = size)
+                pizzaUiState.copy(pizzaSize = size)
             } else {
                 pizzaUiState
             }
@@ -38,14 +39,15 @@ class OrderViewModel @Inject constructor() : ViewModel(), OrderInteraction {
         _state.value = updatedState
     }
 
-    override fun onIngredientsClick(ingredientsPosition: Int, pizzaPosition: Int) {
+
+    override fun onIngredientsClick(ingredientPosition: Int, pizzaPosition: Int) {
         _state.update {
             it.copy(
                 it.pizzaBreads.mapIndexed { pizzaIndex, pizza ->
                     if (pizzaIndex == pizzaPosition) {
                         pizza.copy(
                             pizzaIngredients = pizza.pizzaIngredients.mapIndexed { index, ingredient ->
-                                if (index == ingredientsPosition) {
+                                if (index == ingredientPosition) {
                                     ingredient.copy(isSelected = !ingredient.isSelected)
                                 } else {
                                     ingredient.copy(isSelected = ingredient.isSelected)

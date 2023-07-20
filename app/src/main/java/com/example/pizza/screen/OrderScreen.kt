@@ -2,6 +2,9 @@ package com.example.pizza.screen
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -15,11 +18,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.PagerState
@@ -37,15 +43,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pizza.OrderInteraction
+import com.example.pizza.PizzaSize
 import com.example.pizza.R
 import com.example.pizza.screen.composable.PizzaPager
 import com.example.pizza.ui.theme.Brown
@@ -91,7 +100,7 @@ fun OrderContent(
 
                 Box {
                     Image(
-                        modifier = Modifier.size(state.pizzaBreads[page].defaultSize.dp),
+                        modifier = Modifier.size(state.pizzaBreads[page].pizzaSize.size.dp),
                         contentScale = ContentScale.Crop,
                         painter = painterResource(id = state.pizzaBreads[page].image),
                         contentDescription = "pizza"
@@ -99,13 +108,18 @@ fun OrderContent(
                 }
 
                 state.pizzaBreads[pagerState.currentPage].pizzaIngredients.forEach {
-                    IngredientsAnimation(it)
+                    IngredientsAnimation(
+                        state = it,
+                        size = state.pizzaBreads[pagerState.currentPage].pizzaSize.size
+                    )
                 }
             }
         }
 
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
             text = "$20",
             style = MaterialTheme.typography.bodyLarge.copy(
                 textAlign = TextAlign.Center,
@@ -114,26 +128,12 @@ fun OrderContent(
             )
         )
 
-        Row(
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(text = "S", modifier = Modifier
-                .clip(CircleShape)
-                .padding(4.dp)
-                .clickable { orderInteraction.onChangePizzaSize(pagerState.currentPage, 176f) }
-            )
-            Text(text = "M", modifier = Modifier
-                .clip(CircleShape)
-                .clickable { orderInteraction.onChangePizzaSize(pagerState.currentPage, 200f) }
-                .padding(4.dp))
-            Text(text = "L", modifier = Modifier
-                .clip(CircleShape)
-                .clickable { orderInteraction.onChangePizzaSize(pagerState.currentPage, 224f) }
-                .padding(4.dp))
-        }
+        PizzaSizeOrder(
+            state = state.pizzaBreads[pagerState.currentPage],
+            orderInteraction,
+            pagerState
+        )
+
 
         Text(
             modifier = Modifier
@@ -153,7 +153,7 @@ fun OrderContent(
         ) {
             itemsIndexed(state.pizzaBreads[pagerState.currentPage].pizzaIngredients) { index: Int, item: IngredientsTypeUiState ->
                 IconIngredients(state = item, isSelected = item.isSelected,
-                    onClick = { orderInteraction.onIngredientsClick(index ,pagerState.currentPage) }
+                    onClick = { orderInteraction.onIngredientsClick(index, pagerState.currentPage) }
                 )
             }
         }
@@ -179,15 +179,95 @@ fun OrderContent(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PizzaSizeOrder(
+    state: PizzaUiState,
+    orderInteraction: OrderInteraction,
+    pagerState: PagerState
+) {
+
+    val offsetAnimation: Dp by animateDpAsState(
+        when (state.pizzaSize) {
+            PizzaSize.SMALL -> 148.dp
+            PizzaSize.MEDIUM -> (148 + 38).dp
+            PizzaSize.LARGE -> (148 + 38 + 36).dp
+        }, spring(stiffness = Spring.StiffnessLow), label = "pizza size animation"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+    ) {
+
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .fillMaxSize()
+                .absoluteOffset(x = offsetAnimation, y = 10.dp)
+                .shadow(
+                    elevation = 6.dp,
+                    shape = CircleShape,
+                    ambientColor = Color.Black,
+                    spotColor = Color.Black
+                )
+                .clip(CircleShape)
+                .background(Color.White)
+        )
+
+        Row(
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = "S", modifier = Modifier
+                .clip(CircleShape)
+                .clickable {
+                    orderInteraction.onChangePizzaSize(
+                        pagerState.currentPage,
+                        PizzaSize.SMALL
+                    )
+                }
+                .padding(4.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = "M", modifier = Modifier
+                .clip(CircleShape)
+                .clickable {
+                    orderInteraction.onChangePizzaSize(
+                        pagerState.currentPage,
+                        PizzaSize.MEDIUM
+                    )
+                }
+                .padding(4.dp))
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(text = "L", modifier = Modifier
+                .clip(CircleShape)
+                .clickable {
+                    orderInteraction.onChangePizzaSize(
+                        pagerState.currentPage,
+                        PizzaSize.LARGE
+                    )
+                }
+                .padding(4.dp))
+        }
+    }
+}
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun IngredientsAnimation(state: IngredientsTypeUiState) {
+fun IngredientsAnimation(size: Float, state: IngredientsTypeUiState) {
     AnimatedVisibility(
         visible = state.isSelected,
         enter = scaleIn(initialScale = 4f) + fadeIn(),
         exit = fadeOut()
     ) {
         Image(
+            modifier = Modifier.size((size - 20).dp),
             painter = painterResource(id = state.image),
             contentDescription = "plate",
         )
@@ -224,6 +304,9 @@ private fun OrderScreenAppBar(modifier: Modifier = Modifier) {
             contentDescription = "back arrow"
         )
         Text(text = "Pizza")
-        Icon(painter = painterResource(id = R.drawable.ic_heart), contentDescription = "favorite")
+        Icon(
+            painter = painterResource(id = R.drawable.ic_heart),
+            contentDescription = "favorite"
+        )
     }
 }
